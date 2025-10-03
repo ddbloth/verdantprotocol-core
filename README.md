@@ -1,67 +1,83 @@
-# 🌿 VerdantProtocol
+# 🌿 verdantprotocol-core
 
-**VerdantProtocol** is a modular, scalable, and intelligent environmental monitoring and automation framework designed for grow tents, greenhouses, and beyond. It leverages a swarm of Wi-Fi-enabled sensor nodes to feed real-time data to a central master controller, which orchestrates actuator responses to optimize plant health and resource efficiency.
+Core master-controller code for VerdantProtocol: MQTT glue, parsing, logging, automation rules, actuators, and an optional dashboard. This repo is intended to run on a Pi-class device (development notes use Raspberry Pi 5) and coordinate sensor nodes and actuators over MQTT.
 
-ddb - Dev Notes:
-On Pi 5 Beta - top dir of verdant-protocol, repos under that (core, nodes, etc)
- - Virt Env is at top level, not in repo levels
- - - Believe we can use this to potentialy nest variations on the venv reuirments?  ponder.
- - source .vp-venv/bin/activate
+This README is a concise entrypoint — detailed, implementation-level documentation now lives in each package's README. See the "Module docs" section below.
 
----
+## Quick links
 
-## 🧠 Project Overview
+- Automation rules and actuators: `automation/README.md`
+- MQTT client and topics: `mqtt/README.md`
+- Sensor parsing: `sensors/README.md`
+- Tests and testing guidance: `tests/README.md`
 
-VerdantProtocol is built around the concept of distributed intelligence:
+## Repo layout (high level)
 
-- **Sensor Nodes**: Autonomous Raspberry Pi Pico W modules measuring soil moisture, temperature, humidity, barometric pressure, light, and more.
-- **Master Controller**: A Raspberry Pi 5 running an MQTT broker, automation logic, and optional dashboard.
-- **Actuator Nodes**: Devices like sprinklers, fans, heaters, and humidifiers that respond to commands from the master controller.
+- `main.py` — run the controller (subscribe to MQTT, run automation loop)
+- `requirements.txt` — Python dependencies
+- `automation/`, `mqtt/`, `sensors/`, `utils/`, `dashboard/` — functional modules (see module READMEs)
+- `data/logs.db` — local SQLite file used for development history
+- `tests/` — pytest suite
 
----
+## Quick start
 
-## 🧬 Architecture
-Sensor Nodes (Pico W) --> MQTT --> Raspberry Pi 5 (Master Controller) --> Actuators
+Activate the shared top-level virtualenv (convention used in this workspace):
 
-Each node publishes data to MQTT topics. The master controller subscribes to these topics, logs the data, and triggers automation rules based on thresholds or conditions.
+```bash
+# from repository root (if .vp-venv exists in the parent folder)
+source ../.vp-venv/bin/activate
+```
 
----
+Or create and use a repo-local venv:
 
-## 🎯 Goals
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
 
-- 🌱 Optimize plant health through real-time environmental monitoring
-- 🔧 Enable modular, battery-powered sensor nodes
-- 📡 Use Wi-Fi and MQTT for lightweight communication
-- 🧩 Support scalable deployments from tents to farms
-- 📊 Provide optional dashboards and data logging
+Run the controller:
 
----
+```bash
+python main.py
+```
 
-## 📁 Repositories
+Run tests:
 
-| Repo | Description |
-|------|-------------|
-| `verdantprotocol-core` | Master controller logic, MQTT broker setup, automation scripts |
-| `verdantprotocol-nodes` | Firmware for Pico W sensor modules |
-| `verdantprotocol-actuators` | Scripts and logic for actuator control |
+```bash
+pytest -q
+```
 
----
+## Configuration & environment
 
-## 🚀 Getting Started
+The project prefers minimal code-driven configuration. Common environment variables you may encounter:
 
-1. Flash sensor node firmware to your Pico W devices
-2. Set up the Raspberry Pi 5 with MQTT broker and automation logic
-3. Connect actuators and define rules
-4. Monitor and expand your network as needed
+- `MQTT_BROKER`, `MQTT_PORT`, `MQTT_USER`, `MQTT_PASS` — MQTT connection settings (see `mqtt/client.py`)
+- `VERDANT_DB_PATH` — path to the SQLite DB (if you want to use a different file)
 
----
+Consider creating a `config.example.env` or a small `config.yaml` if you want to centralize runtime options — I can add one if you'd like.
 
-## 📜 License
+## How the pieces fit together (short)
 
-MIT License — open source and ready to grow.
+- Sensor nodes publish telemetry to MQTT topics.
+- The MQTT client (`mqtt/client.py`) receives messages and calls the parser in `sensors/parser.py`.
+- Parsed readings are persisted and evaluated by rules in `automation/rules.py`.
+- When a rule triggers, commands are sent to actuators (via `automation/actuators.py` and MQTT topics).
 
----
+## Contributing
 
-## 🤖 Join the Swarm
+Open PRs with small, focused changes and tests. Add or update module-level documentation when you change behavior. See the module READMEs for testing and development tips.
 
-VerdantProtocol is designed to evolve. Add new sensors, expand your zones, and automate smarter. This is just the beginning.
+## Notes / TODOs
+
+- Add a runtime config example (`config.example.env` or `config.example.yaml`).
+- Add a systemd service example for running on Raspberry Pi.
+- Consider expanding the dashboard and adding authentication for remote access.
+
+## License
+
+MIT
+
+## Contact / Author
+
+Maintained by the VerdantProtocol project. See the parent workspace for other repos (nodes, actuators) and developer notes.
