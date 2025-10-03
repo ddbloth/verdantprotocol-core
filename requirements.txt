@@ -1,0 +1,6 @@
+paho-mqtt       # MQTT client library
+schedule        # For timed automation tasks
+RPi.GPIO        # If controlling GPIO directly
+flask           # Optional: for dashboard/web interface
+python-dotenv   # For config management
+requests        # For making HTTP requests to APIs

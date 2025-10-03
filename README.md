@@ -2,6 +2,12 @@
 
 **VerdantProtocol** is a modular, scalable, and intelligent environmental monitoring and automation framework designed for grow tents, greenhouses, and beyond. It leverages a swarm of Wi-Fi-enabled sensor nodes to feed real-time data to a central master controller, which orchestrates actuator responses to optimize plant health and resource efficiency.
 
+ddb - Dev Notes:
+On Pi 5 Beta - top dir of verdant-protocol, repos under that (core, nodes, etc)
+ - Virt Env is at top level, not in repo levels
+ - - Believe we can use this to potentialy nest variations on the venv reuirments?  ponder.
+ - source .vp-venv/bin/activate
+
 ---
 
 ## 🧠 Project Overview
